@@ -10,8 +10,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpRequestEncoder;
-import io.netty.handler.codec.http.HttpResponseDecoder;
+import io.netty.handler.codec.http.*;
 
 /**
  * Created by zhangliang on 2019-09-15.
@@ -29,7 +28,10 @@ public class HttpServerMain {
                    .channel(NioServerSocketChannel.class)
                    .childHandler(new ChannelInitializer<SocketChannel>() {
                        protected void initChannel(SocketChannel socketChannel) throws Exception {
-                           socketChannel.pipeline().addLast(new HttpRequestEncoder(),/*new HttpResponseDecoder(),*/new HttpServerHandler());
+                           socketChannel.pipeline().addLast(new HttpRequestDecoder());
+                           socketChannel.pipeline().addLast("http-aggregator",new HttpObjectAggregator(65536));
+                           socketChannel.pipeline().addLast(new HttpResponseEncoder());
+                           socketChannel.pipeline().addLast(new HttpServerHandler());
                        }
                    })
                    .option(ChannelOption.SO_BACKLOG, 128)
@@ -40,7 +42,8 @@ public class HttpServerMain {
            //在服务器套接字关闭之前保持等待
            //在这个例子中，这不会发生，但你可以优雅的做这件事
            //关闭服务
-System.out.println("Server start OK");
+           ClassMappingLoader.loader();
+System.out.println("Server start OK，Port:" + 8883);
            f.channel().closeFuture().sync();
        }catch (Exception e){
            e.printStackTrace();
