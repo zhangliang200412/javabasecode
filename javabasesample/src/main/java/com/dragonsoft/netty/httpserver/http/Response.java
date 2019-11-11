@@ -21,14 +21,20 @@ public class Response {
     }
 
     public void write(Object object){
-        write("application/json", object);
+        write("application/json", 200, object);
     }
-    public void write(String contextType, Object object){
+
+    public void write(Object object, int status){
+        write("application/json", status, object);
+    }
+
+
+    public void write(String contextType, int status,  Object object){
 
         String s = JSON.toJSONString(object);
 
         FullHttpResponse resp = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-                HttpResponseStatus.OK,
+                HttpResponseStatus.valueOf(status),
                 Unpooled.copiedBuffer(s, CharsetUtil.UTF_8));
 
         resp.headers().set(HttpHeaderNames.CONTENT_TYPE, contextType + "; charset=UTF-8");

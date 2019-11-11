@@ -1,10 +1,12 @@
 package com.dragonsoft.netty.httpserver;
 
+import com.dragonsoft.netty.httpserver.annotation.Param;
 import com.dragonsoft.netty.httpserver.http.Request;
 import com.dragonsoft.netty.httpserver.http.Response;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
 /**
  * Created by Administrator on 2019/11/10.
@@ -15,6 +17,11 @@ public class DispatherServlet {
 
         ClassMappingLoader.InvokerHolder method = findMethod(request);
 
+        if(method == null){
+            response.write("server error,no handler find", 500);
+            return;
+        }
+
         Object object = invokeMethod(request,method);
 
         response.write(object);
@@ -22,7 +29,31 @@ public class DispatherServlet {
 
     private Object invokeMethod(Request request,ClassMappingLoader.InvokerHolder method) throws IllegalAccessException, InstantiationException, InvocationTargetException {
         Object o = method.getClazz().newInstance();
-        Object invoke = method.getMethod().invoke(o, request);
+
+        Parameter[] parameters = method.getMethod().getParameters();
+        Object invoke = null;
+
+        if(parameters == null || parameters.length == 0){
+            invoke = method.getMethod().invoke(o);
+        }else{
+            Object[] args = new Object[parameters.length];
+            int i = 0;
+            for(Parameter parameter : parameters){
+                if(Request.class.getName().equals(parameter.getParameterizedType().getTypeName())){
+                    args[i] = request;
+                }else{
+                    Param annotation = parameter.getAnnotation(Param.class);
+                    if (annotation != null){
+                        args[i] = request.getParameter(annotation.value());
+                    }else{
+                        throw new RuntimeException("unkown parameter type");
+                    }
+                }
+                i++;
+            }
+            invoke = method.getMethod().invoke(o, args);
+        }
+
         return invoke;
     }
 

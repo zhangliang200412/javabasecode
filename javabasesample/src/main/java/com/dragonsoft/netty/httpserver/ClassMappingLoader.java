@@ -36,8 +36,6 @@ public class ClassMappingLoader {
                         POST postAnno = method.getAnnotation(POST.class);
                         if(postAnno != null){
                             mapping.put(appendPath(rootPath , postAnno.value() ), new InvokerHolder(method, clazz));
-                        }else{
-                            throw new RuntimeException("");
                         }
                     }
                 }
