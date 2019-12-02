@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TEST-WEBSOCKET</title>
+</head>
+<body>
+
+</body>
+
+<script type="text/javascript">
+    let retry = null
+    let wbs = null
+    function openWebSocket() {
+        /** 创建WebSocket客户端 */
+        wbs = new WebSocket("ws://localhost:8081/websocket")
+        /** 定义接收消息弹窗显示 */
+        wbs.onmessage = (evt) => {
+            /** 弹窗打印服务器发送的消息内容 */
+            alert(evt.data)
+        }
+        /** 定义连接打开后需要发送的消息 */
+        wbs.onopen = () => {
+            console.log("WebSocket连接已打开")
+            /** 打开连接即发送消息 */
+            wbs.send("HELLO");
+
+            /** 打开后如果重试还在 清楚重试对象 */
+            if (retry !== null) {
+                clearInterval(retry)
+                retry = null
+            }
+        }
+        /** 连接被关闭后需要做的事情，这里是关闭后重新轮询服务端是否已经准备好了，准备好了就打开连接 */
+        wbs.onclose = () => {
+            console.log('WebSocket被关闭了')
+            if (null === retry) {
+                retry = setInterval(function () {
+                    console.log("尝试重连....")
+                    openWebSocket()
+                }, 3000);
+            }
+        }
+    }
+
+    openWebSocket();
+
+</script>
+
+</html>
