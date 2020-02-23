@@ -8,5 +8,6 @@ public class GitTest {
     public static void main(String []ags){
         //我是develop功能
         //develop开发
+        //release 开发
     }
 }
