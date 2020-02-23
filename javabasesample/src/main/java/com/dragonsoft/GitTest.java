@@ -7,6 +7,8 @@ public class GitTest {
 
     public static void main(String []ags){
         //我是develop功能
+
         //主干修改
+        //develop开发
     }
 }
