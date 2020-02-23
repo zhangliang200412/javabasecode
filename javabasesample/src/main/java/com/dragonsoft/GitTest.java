@@ -10,5 +10,6 @@ public class GitTest {
 
         //主干修改
         //develop开发
+        //release 开发
     }
 }
